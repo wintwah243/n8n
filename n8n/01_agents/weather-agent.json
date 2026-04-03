@@ -1,0 +1,293 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        0
+      ],
+      "id": "249bed0f-58ed-4291-9133-c584236ba18f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are a tool-using research assistant agent.\n\nIMPORTANT RULE:\nYou must ONLY call tools.\nYou must NOT generate JSON.\nYou must NOT return any structured output.\nYou must NOT write \"topic\", \"summary\", or \"key findings\" as JSON.\n\nWORKFLOW:\n\n1. Call OpenWeatherMap tool to get weather data.\n2. Convert temperature to Celsius.\n3. Call getAirQuality tool to get AQI.\n\n4. Create a VERY SHORT plain text summary in Burmese (1-2 lines only, no JSON).\n\n5. Call Google Sheets tool to save:\n   location, temperature (C), condition, humidity, wind speed, AQI, summary, timestamp.\n\n6. Call Gmail tool:\n\nSubject: Weather Report\n\nMessage:\nLocation: [location]\nTemp: [temperature C]\nCondition: [condition]\nAQI: [AQI]\nSummary: [short Burmese text]\n\nSTRICT RULES:\n- No JSON\n- No brackets {}\n- No lists\n- No long text\n- Only plain text\n- Always call ALL tools\n\nLanguage: Burmese",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        512,
+        0
+      ],
+      "id": "256ee927-91ae-4ba6-93d1-52ba941f32ab",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "format": "imperial",
+        "cityName": "Yangon"
+      },
+      "type": "n8n-nodes-base.openWeatherMapTool",
+      "typeVersion": 1,
+      "position": [
+        576,
+        224
+      ],
+      "id": "66708d0b-ea67-4b7d-b03c-a2d2343a8b1d",
+      "name": "OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "zmbaKg67FjwCBM9J",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Makes an HTTP request and returns the Air Quality",
+        "url": "https://www.airnowapi.org/aq/observation/zipCode/current/?format=application/json&zipCode=20002&distance=25&API_KEY=YOUR_API_KEY",
+        "options": {},
+        "optimizeResponse": true
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        1056,
+        192
+      ],
+      "id": "b13b1593-50f8-44bd-bc32-b5d2db67a6ae",
+      "name": "getAirQuality"
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        144,
+        224
+      ],
+      "id": "0439b346-be5a-4cab-9013-0c9339af8899",
+      "name": "Groq ",
+      "credentials": {
+        "groqApi": {
+          "id": "J1UmuOZ3VkzXq6FN",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "trail-run-session"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        224
+      ],
+      "id": "1d74f11d-4025-4c7b-a8e1-28e4c8398afd",
+      "name": "Memory"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "wahwint72@gmail.com",
+          "mode": "list",
+          "cachedResultName": "wahwint72@gmail.com"
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        448,
+        320
+      ],
+      "id": "6aba5e2c-9e01-412d-a8e8-0e4c46b60aff",
+      "name": "Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "0s1eUswmdtfAlHpO",
+          "name": "Google Calendar OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1fndjUkTp3ykGRvcsTu5CjgIWUzINf28e9_waQ1znRu8",
+          "mode": "list",
+          "cachedResultName": "Trails-n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fndjUkTp3ykGRvcsTu5CjgIWUzINf28e9_waQ1znRu8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Run",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fndjUkTp3ykGRvcsTu5CjgIWUzINf28e9_waQ1znRu8/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        736,
+        288
+      ],
+      "id": "e061d814-04c4-4543-864c-021676a3a4b3",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "5PsSVp3EWvoIjtf5",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "wahwint72@gmail.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        224
+      ],
+      "id": "ac82fafd-e0b8-4421-b460-278779f5a883",
+      "name": "Gmail",
+      "webhookId": "9b4fe4e7-49e7-4d64-881c-560ee3c1962c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "KHQFxA2Y1YNwc2UG",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getAirQuality": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq ": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "238f4c85-e13b-4455-80ce-3d7958da9881",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "395a6122e9204cd2d523e3efbbd99d8dc472ee56b5ac1c49020c994adb29acdc"
+  },
+  "id": "RQNdauQBhsqgbDAd",
+  "tags": []
+}

@@ -1,0 +1,162 @@
+{
+  "name": "Essay-Generator-Bot-Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8d7f15c9-6a33-4864-a617-4528452abcd5",
+      "name": "Telegram Trigger",
+      "webhookId": "e5a53c8d-516c-46e9-9551-abc42b57801d",
+      "credentials": {
+        "telegramApi": {
+          "id": "bCmjuzgs7ZGrsG5w",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a factual essay writer. \nYour task is to write an essay ONLY on the exact topic provided by the user. \nDo not deviate to related topics unless they are part of the user's request.\n\nUser's Topic: \"{{ $node[\"Telegram Trigger\"].json[\"message\"][\"text\"] }}\"\n\nIf the user says \"Environment\", write about the environment specifically. ",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "43dc8764-9a1a-4e9b-a461-f398d9886d3a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "78ace0b5-8b5a-4e42-ace4-e17135b4df91",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "hOPTq7aHoJDRWiqa",
+          "name": "Groq account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "b8121c9f-c459-43ce-afd7-d94b95cc9a49",
+      "name": "Send a document",
+      "webhookId": "e3c0c5f3-bbd2-4c70-85cd-5aec9274beaf",
+      "credentials": {
+        "telegramApi": {
+          "id": "bCmjuzgs7ZGrsG5w",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "rtf",
+        "binaryPropertyName": "=data",
+        "options": {
+          "fileName": "=essay.rtf"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        0
+      ],
+      "id": "e681528c-0fba-41f3-b4a5-84134cea3d9c",
+      "name": "Convert to File"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Send a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "36e84105-32ba-4cdc-8d37-fc206e0ef60e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "395a6122e9204cd2d523e3efbbd99d8dc472ee56b5ac1c49020c994adb29acdc"
+  },
+  "id": "fNn0FO8fSybLuJIv",
+  "tags": []
+}
